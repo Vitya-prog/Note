@@ -1,5 +1,8 @@
 package com.android.notes.ui
 
+
+import android.net.Network
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.android.notes.data.Note
 import com.android.notes.repository.NoteRepository
@@ -10,9 +13,11 @@ import javax.inject.Inject
 class NotesListViewModel @Inject constructor(
     private val noteRepository: NoteRepository
 ) : ViewModel()  {
-
         val notesList = noteRepository.getNotesList()
         fun addNote(note: Note){
             noteRepository.addNote(note)
         }
+    fun deleteNote(note: Note){
+        noteRepository.deleteNote(note)
+    }
 }

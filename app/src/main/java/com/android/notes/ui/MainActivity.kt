@@ -2,10 +2,14 @@ package com.android.notes.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.widget.Toolbar
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.preference.PreferenceManager
 import com.android.notes.R
 import dagger.hilt.android.AndroidEntryPoint
-
+private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
@@ -16,5 +20,18 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.my_toolbar)
         setSupportActionBar(toolbar)
 
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        val isAgain = sp.getBoolean("isAgain",false)
+        Log.d(TAG,"$isAgain")
+        val e = sp.edit()
+        e.putBoolean("isAgain",true)
+        e.apply()
+        val bundle = Bundle()
+        bundle.putBoolean("isAgain",isAgain)
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment?
+        val navController = navHostFragment!!.navController
+        navController.setGraph(R.navigation.nav_host,bundle)
     }
+
 }
