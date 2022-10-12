@@ -11,7 +11,10 @@ class NoteRepository @Inject constructor(
     private val noteDao: NoteDao
 ) {
     private val executor =  Executors.newSingleThreadExecutor()
-    fun getNotesList(): LiveData<List<Note>>{
+    fun getNotesListLiveData(): LiveData<List<Note>>{
+        return noteDao.getNotesListLiveData()
+    }
+    suspend fun getNotesList():List<Note>{
         return noteDao.getNotesList()
     }
     fun getNote(id:UUID):LiveData<Note>{

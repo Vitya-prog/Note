@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
-        val isAgain = sp.getBoolean("isAgain",false)
+        isAgain = sp.getBoolean("isAgain",false)
         Log.d(TAG,"$isAgain")
         val e = sp.edit()
         e.putBoolean("isAgain",true)
@@ -33,5 +33,7 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment!!.navController
         navController.setGraph(R.navigation.nav_host,bundle)
     }
-
+    companion object{
+        var isAgain = false
+    }
 }

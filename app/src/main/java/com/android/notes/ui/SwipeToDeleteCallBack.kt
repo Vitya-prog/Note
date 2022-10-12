@@ -8,7 +8,7 @@ abstract class SwipeToDeleteCallBack: ItemTouchHelper.Callback() {
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        val swipeFlag = ItemTouchHelper.RIGHT
+        val swipeFlag = ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT
         return makeMovementFlags(0,swipeFlag)
     }
 

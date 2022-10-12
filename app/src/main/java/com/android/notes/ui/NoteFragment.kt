@@ -34,6 +34,23 @@ class NoteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        noteViewModel.note.observe(viewLifecycleOwner){
+            binding.noteNameEditText.setText(it.name)
+            binding.noteDescriptionEditText.setText(it.description)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.noteNameEditText.setOnFocusChangeListener { _, _ ->
+            updateActionBar()
+        }
+        binding.noteDescriptionEditText.setOnFocusChangeListener { _, _ ->
+            updateActionBar()
+        }
+        }
+
+    private fun updateActionBar() {
         val menuHost:MenuHost = requireActivity()
         menuHost.addMenuProvider(object:MenuProvider{
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -49,7 +66,7 @@ class NoteFragment : Fragment() {
                             binding.noteDescriptionEditText.text.toString(),
                             Date()
                         ))
-                        view.findNavController().navigate(R.id.action_noteFragment_to_notesListFragment)
+                        view?.findNavController()?.navigate(R.id.action_noteFragment_to_notesListFragment)
                         true
                     }
                     else -> {false}
@@ -57,13 +74,6 @@ class NoteFragment : Fragment() {
             }
 
         },viewLifecycleOwner)
-        noteViewModel.note.observe(viewLifecycleOwner){
-            binding.noteNameEditText.setText(it.name)
-            binding.noteDescriptionEditText.setText(it.description)
-        }
     }
-private fun createMenuProvider(){
-
-}
 
 }

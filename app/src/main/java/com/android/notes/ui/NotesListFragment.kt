@@ -3,8 +3,7 @@ package com.android.notes.ui
 
 
 
-import android.content.IntentFilter
-import android.net.ConnectivityManager
+
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,31 +14,36 @@ import androidx.annotation.RequiresApi
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.android.notes.NoteBroadcastReceiver
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.android.notes.NetworkConnectionLiveData
 import com.android.notes.R
 import com.android.notes.adapter.NoteListAdapter
 import com.android.notes.data.Note
 import com.android.notes.databinding.FragmentNoteListBinding
+import com.android.notes.worker.NoteWorkManager
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 
 private const val TAG ="NotesListFragment"
 @AndroidEntryPoint
-class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener,NoteBroadcastReceiver.OnChangeUi{
-
-    private val noteBroadcastReceiver = NoteBroadcastReceiver(this)
-    private var isAgain:Boolean? = false
+class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener {
     private lateinit var binding: FragmentNoteListBinding
     private val notesListViewModel:NotesListViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        isAgain = arguments?.getBoolean("isAgain")
         binding = FragmentNoteListBinding.inflate(inflater,container,false)
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         return binding.root
@@ -49,14 +53,54 @@ class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener,NoteBro
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-             activity?.registerReceiver(noteBroadcastReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        val workRequest = OneTimeWorkRequestBuilder<NoteWorkManager>().addTag("request").build()
+        val workManager = WorkManager.getInstance(requireContext())
+        NetworkConnectionLiveData(requireContext()).observe(viewLifecycleOwner){ isConnected ->
+            if (MainActivity.isAgain){
+                binding.progressBarHorizontal.visibility = View.VISIBLE
+                if(isConnected){
+                workManager.beginUniqueWork("request",ExistingWorkPolicy.KEEP,workRequest).enqueue()
+                workManager.getWorkInfoByIdLiveData(workRequest.id).observe(viewLifecycleOwner) { workInfo ->
+                    workInfo.let {
+                        val progress = workInfo.progress
+                        val value = progress.getInt("Progress",0)
+                        binding.progressBarHorizontal.progress = value
+                        if (it.state == WorkInfo.State.SUCCEEDED){
+                            binding.layout.removeView(binding.progressBarHorizontal)
+                        }
+                    }
+                }
+                } else {
+                    workManager.cancelAllWorkByTag("request")
+                    val snackBar = Snackbar.make(view,"Проверьте подключение",Snackbar.LENGTH_SHORT)
+                    snackBar.show()
+                }
+            } else {
+                binding.progressBar.visibility = View.VISIBLE
+                binding.NoInternetTextView.visibility = View.GONE
+                if (isConnected){
+                    workManager.beginUniqueWork("request",ExistingWorkPolicy.KEEP,workRequest).enqueue()
+                    workManager.getWorkInfoByIdLiveData(workRequest.id).observe(viewLifecycleOwner) { workInfo ->
+                        workInfo.let {
+                    if(it.state == WorkInfo.State.SUCCEEDED){
+                        binding.layout.removeView(binding.progressBar)
+                        binding.layout.removeView(binding.NoInternetTextView)
+                    }
+                        }
+                    }
+                } else {
+                    binding.progressBar.visibility = View.GONE
+                    workManager.cancelAllWorkByTag("request")
+                    binding.NoInternetTextView.visibility = View.VISIBLE
+                }
+            }
+        }
             notesListViewModel.notesList.observe(viewLifecycleOwner) { notes ->
-//                Log.d(TAG, "$notes")
                 val adapter = NoteListAdapter(this)
                 adapter.submitList(notes)
                 binding.recyclerView.adapter = adapter
-                swipeToDelete(notes)
             }
+        swipeToDelete()
 
     }
     override fun onStart() {
@@ -66,12 +110,15 @@ class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener,NoteBro
         }
     }
 
-    private fun swipeToDelete(notes:List<Note>){
+    private fun swipeToDelete(){
         val swipeToDeleteCallBack = object:SwipeToDeleteCallBack(){
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                Log.d(TAG,"$position")
-                notesListViewModel.deleteNote(notes[position])
+                    Log.d(TAG,"$position")
+                viewLifecycleOwner.lifecycleScope.launch {
+                    notesListViewModel.swipeToDeleteNote(position)
+                }
+
                 binding.recyclerView.adapter?.notifyItemRemoved(position)
             }
         }
@@ -82,17 +129,6 @@ class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener,NoteBro
 
     override fun onItemClickListener(note: Note) {
         val bundle = bundleOf("id" to note.id.toString())
-//        activity?.findNavController(R.id.fragmentContainerView)?.navigate(R.id.action_notesListFragment_to_noteFragment,bundle)
         view?.findNavController()?.navigate(R.id.action_notesListFragment_to_noteFragment,bundle)
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        activity?.unregisterReceiver(noteBroadcastReceiver)
-    }
-
-    override fun onChange() {
-        binding.NoInternetTextView.visibility = View.VISIBLE
-    }
-
 }

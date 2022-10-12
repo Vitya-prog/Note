@@ -12,7 +12,9 @@ import java.util.*
 @Dao
 interface NoteDao {
 @Query("SELECT * FROM note")
-fun getNotesList(): LiveData<List<Note>>
+fun getNotesListLiveData(): LiveData<List<Note>>
+@Query("SELECT * FROM note")
+suspend fun getNotesList():List<Note>
 @Query("SELECT * FROM note WHERE id =:id")
 fun getNote(id: UUID):LiveData<Note>
 @Update
