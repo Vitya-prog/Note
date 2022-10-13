@@ -1,7 +1,7 @@
 package com.android.notes.adapter
 
 
-import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,7 @@ import com.android.notes.R
 import com.android.notes.data.Note
 import java.text.SimpleDateFormat
 import java.util.*
-private const val TAG="NoteListAdapter"
+
 class NoteListAdapter(private val listener:OnItemClickListener)
     :ListAdapter<Note,NoteListAdapter.NoteViewHolder>(DiffCallBack()) {
 interface OnItemClickListener{

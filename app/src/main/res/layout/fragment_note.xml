@@ -8,29 +8,29 @@
 
     <EditText
         android:id="@+id/noteNameEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="55dp"
-        android:layout_marginTop="125dp"
+        android:layout_width="324dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="131dp"
+        android:autofillHints=""
         android:ems="10"
-        android:hint ="@string/input_name"
+        android:hint="@string/input_name"
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:autofillHints="" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/noteDescriptionEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="55dp"
-        android:layout_marginTop="60dp"
+        android:layout_width="324dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="109dp"
+        android:autofillHints=""
         android:ems="10"
-        android:hint ="@string/input_description"
+        android:hint="@string/input_description"
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/noteNameEditText"
-        android:autofillHints="" />
+        app:layout_constraintTop_toBottomOf="@+id/noteNameEditText" />
 </androidx.constraintlayout.widget.ConstraintLayout>

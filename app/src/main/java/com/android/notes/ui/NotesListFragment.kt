@@ -6,7 +6,6 @@ package com.android.notes.ui
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -35,7 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 
-private const val TAG ="NotesListFragment"
+
 @AndroidEntryPoint
 class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener {
     private lateinit var binding: FragmentNoteListBinding
@@ -96,6 +94,8 @@ class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener {
             }
         }
             notesListViewModel.notesList.observe(viewLifecycleOwner) { notes ->
+                if (notes.isEmpty()) binding.noDataTextView.visibility = View.VISIBLE
+                else binding.noDataTextView.visibility = View.GONE
                 val adapter = NoteListAdapter(this)
                 adapter.submitList(notes)
                 binding.recyclerView.adapter = adapter
@@ -114,7 +114,6 @@ class NotesListFragment : Fragment(),NoteListAdapter.OnItemClickListener {
         val swipeToDeleteCallBack = object:SwipeToDeleteCallBack(){
             override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                    Log.d(TAG,"$position")
                 viewLifecycleOwner.lifecycleScope.launch {
                     notesListViewModel.swipeToDeleteNote(position)
                 }

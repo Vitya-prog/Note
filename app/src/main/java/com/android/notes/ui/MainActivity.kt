@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.widget.Toolbar
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
 import com.android.notes.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,12 +24,6 @@ class MainActivity : AppCompatActivity() {
         val e = sp.edit()
         e.putBoolean("isAgain",true)
         e.apply()
-        val bundle = Bundle()
-        bundle.putBoolean("isAgain",isAgain)
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment?
-        val navController = navHostFragment!!.navController
-        navController.setGraph(R.navigation.nav_host,bundle)
     }
     companion object{
         var isAgain = false

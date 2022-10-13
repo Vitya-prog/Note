@@ -4,13 +4,11 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.android.notes.data.Note
 import com.android.notes.data.api.NoteApi
 import com.android.notes.data.dao.NoteDao
-import com.android.notes.ui.NotesListFragment
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
@@ -46,6 +44,11 @@ class NoteWorkManager @AssistedInject constructor(
                     ).parse("05.10.2022 15:20") as Date
                 )
             )
+        }
+        catch (e:Exception){
+//            e.printStackTrace()
+        }
+        try{
             noteDao.addNote(
                 Note(
                     UUID.fromString("e1dfad05-0024-4df2-ad02-f68d04d9d6dd"),
@@ -57,12 +60,22 @@ class NoteWorkManager @AssistedInject constructor(
                     ).parse("02.09.2022 13:14") as Date
                 )
             )
+        }
+        catch (e:Exception){
+//            e.printStackTrace()
+        }
+        try{
             noteDao.addNote(
                 Note(
                     UUID.fromString("eaa55041-b6b1-43da-a41f-ea0561bc4f27"),
                     "Постирать", "Мои вещи и членов семьи", Date()
                 )
             )
+        }
+        catch (e:Exception){
+//            e.printStackTrace()
+        }
+        try {
             noteDao.addNote(
                 Note(
                     UUID.fromString("3c2085af-88d7-4403-b728-62b7b18d85df"),
@@ -76,9 +89,23 @@ class NoteWorkManager @AssistedInject constructor(
             )
         }
         catch (e:Exception){
-            e.printStackTrace()
+//            e.printStackTrace()
         }
+//    loadData()
         return Result.success()
     }
 
- }
+    private fun loadData() {
+        noteApi.getNotes().enqueue(object :Callback<String>{
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                //получаем данные
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.d(TAG,"$t")
+            }
+
+        })
+    }
+
+}
